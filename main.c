@@ -14,18 +14,50 @@
 #include <errno.h>
 
 
-int main (void)
+int getNumOfVals()
 {
-    char input[1];
     int num;
     int status = 0;
 
+    status = scanf("%d", &num);
+    if (status < 0) {
+        perror("scanf");
+    }
 
-    status = read(STDIN_FILENO, input, sizeof(char));
+    return num;
+}
 
-    num = atoi(input);
+void getVals(int numOfVals, int vals[])
+{
+    int status = 0;
+    int i = 0;
 
-    printf("Number: %d\n", num);
+    for (i = 0; i < numOfVals; i++) {
+        status = scanf("%d", &vals[i]);
+        if (status < 0) {
+            perror("scanf");
+        }
+    }
+}
+
+int main (void)
+{
+    int numA = 0; // Number of elements in array a[]
+    //int numX = 0; // Number of elements in array x[]
+    //int numY = 0; // Number of elements in array y[]
+    int i = 0;
+
+    // get value of first number
+    numA = getNumOfVals();
+    // Gather all of the values
+    int arrayA[numA];
+    getVals(numA, arrayA);
+
+    printf("Number of values: %d\n", numA);
+    for (i = 0; i < numA; i++) {
+        printf("%d ", arrayA[i]);
+    }
+    printf("\n");
 
     return 0;
 }
