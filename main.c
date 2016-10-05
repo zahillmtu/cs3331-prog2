@@ -8,7 +8,24 @@
 //     calling the qsort and merge programs to complete
 //     the problem
 // -----------------------------------------------------------
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+
+
 int main (void)
 {
+    char input[1];
+    int num;
+    int status = 0;
+
+
+    status = read(STDIN_FILENO, input, sizeof(char));
+
+    num = atoi(input);
+
+    printf("Number: %d\n", num);
+
     return 0;
 }
