@@ -12,7 +12,7 @@
 
 int main (int argc, char* argv[])
 {
-    printf("I WAS CALLED!\n");
+    printf("QSORT WAS CALLED!\n");
 
     printf("argc: %d\n", argc);
     printf("arg1: %s\n", argv[1]);

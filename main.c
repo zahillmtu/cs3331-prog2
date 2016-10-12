@@ -104,9 +104,23 @@ void qsortChild(key_t shmID, int arraySize)
     run(exec, args);
 }
 
-void mergeChild()
+void mergeChild(key_t shmID, int startInd, int arrXsize, int arrYsize)
 {
-    printf("Called merge\n");
+    char *exec = "./merge";
+    char *args[7] = { NULL };
+    char buf[100];
+
+    args[0] = exec;
+    sprintf(buf, "%d", shmID);
+    args[1] = strdup(buf);
+    sprintf(buf, "%d", startInd);
+    args[2] = strdup(buf);
+    sprintf(buf, "%d", arrXsize);
+    args[3] = strdup(buf);
+    sprintf(buf, "%d", arrYsize);
+    args[4] = strdup(buf);
+
+    run(exec, args);
 }
 
 int main (void)
@@ -159,7 +173,7 @@ int main (void)
 
 
     // Create merge child and runt it
-
+    mergeChild(shmKey, numA, numX, numY);
 
     // wait for both children to run
 
