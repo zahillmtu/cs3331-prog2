@@ -8,6 +8,21 @@
 //     in order to merge previously partitioned data together
 // -----------------------------------------------------------
 #include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+
+// -----------------------------------------------------------
+// FUNCTION printWrap :
+//    A wrapper method for printing using write()
+// PARAMETER USAGE :
+//    buf - A character array of size 100 containing
+//          the print statement
+// FUNCTION CALLED :
+//    write()
+// -----------------------------------------------------------
+void printWrap(char buf[100]) {
+    write(1, buf, strlen(buf));
+}
 
 int main (int argc, char* argv[])
 {

@@ -19,6 +19,19 @@
 #include <sys/wait.h>
 
 
+// -----------------------------------------------------------
+// FUNCTION printWrap :
+//    A wrapper method for printing using write()
+// PARAMETER USAGE :
+//    buf - A character array of size 100 containing
+//          the print statement
+// FUNCTION CALLED :
+//    write()
+// -----------------------------------------------------------
+void printWrap(char buf[100]) {
+    write(1, buf, strlen(buf));
+}
+
 int getNumOfVals()
 {
     int num;
@@ -125,6 +138,7 @@ void mergeChild(key_t shmID, int startInd, int arrXsize, int arrYsize)
 
 int main (void)
 {
+    char buf[100];
     int numA = 0; // Number of elements in array a[]
     int numX = 0; // Number of elements in array x[]
     int numY = 0; // Number of elements in array y[]
@@ -176,6 +190,14 @@ int main (void)
     mergeChild(shmKey, numA, numX, numY);
 
     // wait for both children to run
+    sprintf(buf, "Main Process Waits\n");
+    printWrap(buf);
+    int status;
+    for(i = 0; i < 2; i++) {
+        wait(&status);
+    }
+    sprintf(buf, "Main Process Exits\n");
+    printWrap(buf);
 
     printf("Number of values for a: %d\n", numA);
     for (i = 0; i < numA; i++) {
