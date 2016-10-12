@@ -11,10 +11,12 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <sys/wait.h>
 
 
 int getNumOfVals()
@@ -51,6 +53,60 @@ void loadData(int * shmPrt, int startInd, int endInd, int array[])
         shmPrt[i] = array[k];
         k++;
     }
+}
+
+/**
+ * Function to fork a process and run the execvp command. exec should be set
+ * to the name of the executable and args should contain an array where arg[0]
+ * is the name of the exec and arg[1 - 31] are the arguments passed
+ */
+void run(char *exec, char *args[]) {
+
+    // fork the process
+    pid_t pid = fork();
+    if(pid == -1) {
+        perror("fork");
+        return;
+    }
+    else if(pid == 0) {
+        // The child process
+        // Call execvp
+        if (execvp(exec, args) < 0) {
+            printf("An error occured running the program %s - Try again\n", exec);
+            perror("execvp");
+            exit(EXIT_FAILURE);
+        }
+    }
+    else {
+        // wait for the child
+        int status = 0;
+        wait(&status);
+        return;
+    }
+    return;
+}
+
+void qsortChild(key_t shmID, int arraySize)
+{
+
+    char *exec = "./qsort";
+    char *args[5] = { NULL };
+    char buf[100];
+
+    args[0] = exec;
+    sprintf(buf, "%d", shmID);
+    args[1] = strdup(buf);
+    sprintf(buf, "%d", 0);
+    args[2] = strdup(buf);
+    sprintf(buf, "%d", arraySize);
+    args[3] = strdup(buf);
+
+    run(exec, args);
+}
+
+void mergeChild()
+{
+    printf("Called merge\n");
 }
 
 int main (void)
@@ -94,6 +150,18 @@ int main (void)
 
     // detach from the shared memory
     shmdt(shmPtr);
+
+    // Print out information about data
+
+
+    // Create qsort child and run it
+    qsortChild(shmKey, numA);
+
+
+    // Create merge child and runt it
+
+
+    // wait for both children to run
 
     printf("Number of values for a: %d\n", numA);
     for (i = 0; i < numA; i++) {

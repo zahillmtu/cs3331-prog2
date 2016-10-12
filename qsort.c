@@ -7,7 +7,17 @@
 //     Partitions a set of data a[Left...Right] around an
 //     element a[M] and recursively does this
 // -----------------------------------------------------------
-int main (void)
+
+#include <stdio.h>
+
+int main (int argc, char* argv[])
 {
+    printf("I WAS CALLED!\n");
+
+    printf("argc: %d\n", argc);
+    printf("arg1: %s\n", argv[1]);
+    printf("arg2: %s\n", argv[2]);
+    printf("arg3: %s\n", argv[3]);
+
     return 0;
 }
