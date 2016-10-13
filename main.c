@@ -63,6 +63,7 @@ void loadData(int * shmPrt, int startInd, int endInd, int array[])
     int i = 0;
     int k = 0;
     for (i = startInd; i < endInd; i++) {
+        printf("Loading Value: %d, from index: %d into sharedIndex: %d\n", array[k], k, i);
         shmPrt[i] = array[k];
         k++;
     }
@@ -169,12 +170,34 @@ int main (void)
     int arrayY[numY];
     getVals(numY, arrayY);
 
+    printf("Number of values for a: %d\n", numA);
+    for (i = 0; i < numA; i++) {
+        printf("%d ", arrayA[i]);
+    }
+    printf("\n");
+    printf("Number of values for x: %d\n", numX);
+    for (i = 0; i < numX; i++) {
+        printf("%d ", arrayX[i]);
+    }
+    printf("\n");
+    printf("Number of values for y: %d\n", numY);
+    for (i = 0; i < numY; i++) {
+        printf("%d ", arrayY[i]);
+    }
+    printf("\n");
+
     // Load all of the values into shared memory
     shmID = shmget(shmKey, (numA + numX + numY) * (sizeof(int)), (IPC_CREAT | 0666));
     shmPtr = (int *) shmat(shmID, dataPrt, 0);
     loadData(shmPtr, 0, numA, arrayA);
-    loadData(shmPtr, numA, numX, arrayX);
-    loadData(shmPtr, numX, numY, arrayY);
+    loadData(shmPtr, numA, numX + numA, arrayX);
+    loadData(shmPtr, numX + numA, numY + numA + numX, arrayY);
+
+    printf("Printing data in main shm\n");
+    for (i = 0; i < numA + numX + numY; i++) {
+        printf("%d ", shmPtr[i]);
+    }
+    printf("\n");
 
     // detach from the shared memory
     shmdt(shmPtr);
@@ -199,21 +222,6 @@ int main (void)
     sprintf(buf, "Main Process Exits\n");
     printWrap(buf);
 
-    printf("Number of values for a: %d\n", numA);
-    for (i = 0; i < numA; i++) {
-        printf("%d ", arrayA[i]);
-    }
-    printf("\n");
-    printf("Number of values for x: %d\n", numX);
-    for (i = 0; i < numX; i++) {
-        printf("%d ", arrayX[i]);
-    }
-    printf("\n");
-    printf("Number of values for y: %d\n", numY);
-    for (i = 0; i < numY; i++) {
-        printf("%d ", arrayY[i]);
-    }
-    printf("\n");
 
     // Close out the shared memory
     shmctl(shmID, IPC_RMID, NULL);
