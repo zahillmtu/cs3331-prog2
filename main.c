@@ -261,7 +261,7 @@ int main (void)
     printWrap(buf);
     // Close out the shared memory
     shmctl(shmID, IPC_RMID, NULL);
-    sprintf(buf, "*** MAIN: shared memory successfully removeed\n");
+    sprintf(buf, "*** MAIN: shared memory successfully removed\n");
     printWrap(buf);
 
     return 0;

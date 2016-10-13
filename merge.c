@@ -62,6 +62,7 @@ int main (int argc, char* argv[])
     int * mainShmPtr;
     char * dataPtr = NULL;
     (void) argc;    // surpress warning
+    char buf[100];
 
     key_t mergeShmKey;
     int mergeShmID = 0;
@@ -81,14 +82,19 @@ int main (int argc, char* argv[])
     mergeShmKey = ftok("./", 'm');
 
     // Create shared memory for merged section
+    sprintf(buf,
+            "      $$$ M-PROC: merge shared memory key %d\n",
+            mergeShmKey);
+    printWrap(buf);
     mergeShmID = shmget(mergeShmKey, (arrXsize + arrYsize) * (sizeof(int)),
                    (IPC_CREAT | 0666));
+    sprintf(buf, "      $$$ M-PROC: merge shared memory created\n");
+    printWrap(buf);
 
     // find shared memory from main program
     mainShmID = shmget(mainShmKey,
                        (mainStartInd + arrXsize + arrYsize) * sizeof(int),
                        (066));
-
 
     // Fork all the needed processes
     int i = 0;
@@ -103,26 +109,47 @@ int main (int argc, char* argv[])
         } else if (pid == 0) {
             // attach to the main memory
             mainShmPtr = (int *) shmat(mainShmID, dataPtr, 0);
+            sprintf(buf, "      $$$ M-PROC: main shared memory attached and "
+                         "is ready to use\n");
+            printWrap(buf);
 
             // attach to the merge memory
             mergeShmPtr = (int *) shmat(mergeShmID, mergeDataPtr, 0);
+            sprintf(buf, "      $$$ M-PROC: merged shared memory attached and "
+                         "is ready to use\n");
+            printWrap(buf);
 
             // use binary search to find index, subtract off extra from
             // arrayA in front in the main shared memory
+            sprintf(buf, "      $$$ M-PROC(%d): handling x[%d] = %d\n",
+                         pid, i, mainShmPtr[i + mainStartInd]);
+            printWrap(buf);
             mergeInd = recurseBinary(mainShmPtr[i + mainStartInd],
                                      mainStartInd + arrXsize,
                                      mainStartInd + arrXsize + arrYsize - 1,
                                      mainShmPtr) - mainStartInd;
 
-           index = mergeInd - (arrXsize) + i;
-           mergeShmPtr[index] = mainShmPtr[i + mainStartInd];
+            index = mergeInd - (arrXsize) + i;
+            sprintf(buf, "      $$$ M-PROC(%d): about to write x[%d] = %d "
+                         "into position %d of the output array\n",
+                         pid, i, mainShmPtr[i + mainStartInd], index);
+            printWrap(buf);
+            mergeShmPtr[index] = mainShmPtr[i + mainStartInd];
 
-           // detach from memory
-           shmdt(mainShmPtr);
-           shmdt(mergeShmPtr);
+            // detach from memory
+            shmdt(mainShmPtr);
+            sprintf(buf,
+                "      $$$ M-PROC: main shared memory successfully "
+                "detached\n");
+            printWrap(buf);
+            shmdt(mergeShmPtr);
+            sprintf(buf,
+                "      $$$ M-PROC: merge shared memory successfully "
+                "detached\n");
+            printWrap(buf);
 
-           // exit child process
-           exit(0);
+            // exit child process
+            exit(0);
         }
     }
     for (i = 0; i < arrYsize; i++) {
@@ -133,31 +160,53 @@ int main (int argc, char* argv[])
             perror("fork");
             exit(1);
         } else if (pid == 0) {
-            // attach to the main memory
-            mainShmPtr = (int *) shmat(mainShmID, dataPtr, 0);
+             // attach to the main memory
+             mainShmPtr = (int *) shmat(mainShmID, dataPtr, 0);
+             sprintf(buf, "      $$$ M-PROC: main shared memory attached "
+                          "and is ready to use\n");
+             printWrap(buf);
 
-            // attach to the merge memory
-            mergeShmPtr = (int *) shmat(mergeShmID, mergeDataPtr, 0);
+             // attach to the merge memory
+             mergeShmPtr = (int *) shmat(mergeShmID, mergeDataPtr, 0);
+             sprintf(buf, "      $$$ M-PROC: merge shared memory attached and "
+                          "is ready to use\n");
+             printWrap(buf);
 
-            // use binary search to find index, subtract off extra from
-            // arrayA in front in the main shared memory
-            mergeInd = recurseBinary(mainShmPtr[i + mainStartInd + arrXsize],
-                                     mainStartInd,
-                                     mainStartInd + arrXsize,
-                                     mainShmPtr) - mainStartInd;
+             // use binary search to find index, subtract off extra from
+             // arrayA in front in the main shared memory
+             sprintf(buf, "      $$$ M-PROC(%d): handling y[%d] = %d\n",
+                          pid, i, mainShmPtr[i + mainStartInd + arrXsize]);
+             printWrap(buf);
+             mergeInd = recurseBinary(mainShmPtr[i + mainStartInd + arrXsize],
+                                      mainStartInd,
+                                      mainStartInd + arrXsize,
+                                      mainShmPtr) - mainStartInd;
 
-            index = mergeInd + i;
-            if (index > arrXsize + arrYsize - 2) {
-                index = index - 1;
-            }
-            mergeShmPtr[index] = mainShmPtr[i + mainStartInd + arrXsize];
+             index = mergeInd + i;
+             if (index > arrXsize + arrYsize - 2) {
+                 index = index - 1;
+             }
+             sprintf(buf, "      $$$ M-PROC(%d): about to write y[%d] = %d "
+                          "into position %d of the output array\n",
+                          pid, i, mainShmPtr[i + mainStartInd + arrXsize],
+                          index);
+             printWrap(buf);
+             mergeShmPtr[index] = mainShmPtr[i + mainStartInd + arrXsize];
 
-            // detach from memory
-            shmdt(mainShmPtr);
-            shmdt(mergeShmPtr);
+             // detach from memory
+             shmdt(mainShmPtr);
+             sprintf(buf,
+                 "      $$$ M-PROC: main shared memory successfully "
+                 "detached\n");
+             printWrap(buf);
+             shmdt(mergeShmPtr);
+             sprintf(buf,
+                 "      $$$ M-PROC: merge shared memory successfully "
+                 "detached\n");
+             printWrap(buf);
 
-            // exit child process
-            exit(0);
+             // exit child process
+             exit(0);
         }
     }
 
@@ -168,7 +217,13 @@ int main (int argc, char* argv[])
 
     // Put values back into main shared memory location
     mergeShmPtr = (int *) shmat(mergeShmID, mergeDataPtr, 0);
+    sprintf(buf,
+        "      $$$ M-PROC: merge shared memory attached and is ready to use\n");
+    printWrap(buf);
     mainShmPtr = (int *) shmat(mainShmID, dataPtr, 0);
+    sprintf(buf,
+        "      $$$ M-PROC: main shared memory attached and is ready to use\n");
+    printWrap(buf);
     int k = mainStartInd;
     for (i = 0; i < arrXsize + arrYsize; i++) {
         mainShmPtr[k] = mergeShmPtr[i];
@@ -176,8 +231,17 @@ int main (int argc, char* argv[])
     }
 
     shmdt(mainShmPtr);
+    sprintf(buf,
+            "      $$$ M-PROC: main shared memory successfully detached\n");
+    printWrap(buf);
     shmdt(mergeShmPtr);
+    sprintf(buf,
+            "      $$$ M-PROC: merge shared memory successfully detached\n");
+    printWrap(buf);
     shmctl(mergeShmID, IPC_RMID, NULL);
+    sprintf(buf,
+            "      $$$ M-PROC: merge shared memory successfully removed\n");
+    printWrap(buf);
 
     return 0;
 }
