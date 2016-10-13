@@ -143,6 +143,7 @@ int main (void)
     int numA = 0; // Number of elements in array a[]
     int numX = 0; // Number of elements in array x[]
     int numY = 0; // Number of elements in array y[]
+    int total = 0; // total number of elements in sharedmem
     int shmID = 0;
     int * shmPtr;
     char * dataPrt = NULL;
@@ -169,6 +170,8 @@ int main (void)
     // Gather all of the values
     int arrayY[numY];
     getVals(numY, arrayY);
+
+    total = numA + numX + numY;
 
     printf("Number of values for a: %d\n", numA);
     for (i = 0; i < numA; i++) {
@@ -219,10 +222,19 @@ int main (void)
     for(i = 0; i < 2; i++) {
         wait(&status);
     }
-    sprintf(buf, "Main Process Exits\n");
+
+    shmPtr = (int *) shmat(shmID, dataPrt, 0);
+    sprintf(buf, "*** MAIN: merged array:\n");
     printWrap(buf);
+    sprintf(buf, "    ");
+    printWrap(buf);
+    for (i = numA; i < total; i++) {
+        sprintf(buf, "%4d", shmPtr[i]);
+        printWrap(buf);
+    }
+    printf("\n");
 
-
+    shmdt(shmPtr);
     // Close out the shared memory
     shmctl(shmID, IPC_RMID, NULL);
 

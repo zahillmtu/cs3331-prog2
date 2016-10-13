@@ -47,7 +47,7 @@ int recurseBinary (int value, int startInd, int endInd, int * mainShmPtr)
         if (value > mainShmPtr[(length / 2) + startInd]) {
             printf("Looking at bigger half\n");
             return recurseBinary(value, (length / 2) + startInd,
-                                 endInd - 1, mainShmPtr);
+                                 endInd, mainShmPtr);
         }
         else {
             printf("Looking at smaller half for value: %d compared to:%d\n", value, mainShmPtr[(length / 2) + startInd]);
@@ -160,7 +160,7 @@ int main (int argc, char* argv[])
                                      mainStartInd + arrXsize,
                                      mainShmPtr) - mainStartInd;
 
-           index = mergeInd + i + 1;
+           index = mergeInd + i;
            printf("Y     Index of: %d, for val: %d\n", index, mainShmPtr[i + mainStartInd + arrXsize]);
            mergeShmPtr[index] = mainShmPtr[i + mainStartInd + arrXsize];
 
