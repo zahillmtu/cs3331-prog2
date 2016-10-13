@@ -35,22 +35,18 @@ int recurseBinary (int value, int startInd, int endInd, int * mainShmPtr)
     // When you get to size one, if it is smaller than it goes
     // at this index, larger go one to the right
     if (length == 1 && mainShmPtr[startInd] < value) {
-        printf("Value: %d goes right of index: %d\n", value, startInd + 1);
         return startInd + 1;
     }
     else if (length == 1 && mainShmPtr[startInd] > value) {
-        printf("Value: %d goes left of index: %d\n", value, startInd);
         return startInd;
     }
     // continue dividing size until length = 1
     else {
         if (value > mainShmPtr[(length / 2) + startInd]) {
-            printf("Looking at bigger half\n");
             return recurseBinary(value, (length / 2) + startInd,
                                  endInd, mainShmPtr);
         }
         else {
-            printf("Looking at smaller half for value: %d compared to:%d\n", value, mainShmPtr[(length / 2) + startInd]);
             return recurseBinary(value, startInd, (length / 2) - 1 + startInd, mainShmPtr);
         }
     }
@@ -65,6 +61,7 @@ int main (int argc, char* argv[])
     int arrYsize = 0;
     int * mainShmPtr;
     char * dataPtr = NULL;
+    (void) argc;    // surpress warning
 
     key_t mergeShmKey;
     int mergeShmID = 0;
@@ -75,20 +72,10 @@ int main (int argc, char* argv[])
 
     pid_t pid;
 
-
-    printf("MERGE WAS CALLED!\n");
-
-    printf("argc: %d\n", argc);
-    printf("arg1: %s\n", argv[1]);
-    printf("arg2: %s\n", argv[2]);
-    printf("arg3: %s\n", argv[3]);
-    printf("arg4: %s\n", argv[4]);
-
     mainShmKey = atoi(argv[1]);
     mainStartInd = atoi(argv[2]);
     arrXsize = atoi(argv[3]);
     arrYsize = atoi(argv[4]);
-
 
     // Get a shared memory key for merge memory
     mergeShmKey = ftok("./", 'm');
@@ -128,7 +115,6 @@ int main (int argc, char* argv[])
                                      mainShmPtr) - mainStartInd;
 
            index = mergeInd - (arrXsize) + i;
-           printf("X     Index of: %d, for val: %d\n", index, mainShmPtr[i + mainStartInd]);
            mergeShmPtr[index] = mainShmPtr[i + mainStartInd];
 
            // detach from memory
@@ -164,7 +150,6 @@ int main (int argc, char* argv[])
             if (index > arrXsize + arrYsize - 2) {
                 index = index - 1;
             }
-            printf("Y     Index of: %d, for val: %d\n", index, mainShmPtr[i + mainStartInd + arrXsize]);
             mergeShmPtr[index] = mainShmPtr[i + mainStartInd + arrXsize];
 
             // detach from memory
@@ -180,7 +165,6 @@ int main (int argc, char* argv[])
     for (i = 0; i < (arrXsize + arrYsize); i++) {
         wait(&status);
     }
-    printf("MERGE - Done waiting for all\n");
 
     // Put values back into main shared memory location
     mergeShmPtr = (int *) shmat(mergeShmID, mergeDataPtr, 0);

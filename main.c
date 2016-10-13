@@ -63,7 +63,6 @@ void loadData(int * shmPrt, int startInd, int endInd, int array[])
     int i = 0;
     int k = 0;
     for (i = startInd; i < endInd; i++) {
-        printf("Loading Value: %d, from index: %d into sharedIndex: %d\n", array[k], k, i);
         shmPrt[i] = array[k];
         k++;
     }
@@ -102,10 +101,12 @@ void run(char *exec, char *args[]) {
 
 void qsortChild(key_t shmID, int arraySize)
 {
-
     char *exec = "./qsort";
     char *args[5] = { NULL };
     char buf[100];
+
+    sprintf(buf, "*** MAIN: about to spawn the process for qsort\n");
+    printWrap(buf);
 
     args[0] = exec;
     sprintf(buf, "%d", shmID);
@@ -123,6 +124,9 @@ void mergeChild(key_t shmID, int startInd, int arrXsize, int arrYsize)
     char *exec = "./merge";
     char *args[7] = { NULL };
     char buf[100];
+
+    sprintf(buf, "*** MAIN: about to spawn the process for merge\n");
+    printWrap(buf);
 
     args[0] = exec;
     sprintf(buf, "%d", shmID);
@@ -173,37 +177,54 @@ int main (void)
 
     total = numA + numX + numY;
 
-    printf("Number of values for a: %d\n", numA);
+    sprintf(buf, "*** MAIN: shared memory key = %d\n", shmKey);
+    printWrap(buf);
+    // create the shared memory
+    shmID = shmget(shmKey, (numA + numX + numY) * (sizeof(int)), (IPC_CREAT | 0666));
+    sprintf(buf, "*** MAIN: shared memory created\n");
+    printWrap(buf);
+    shmPtr = (int *) shmat(shmID, dataPrt, 0);
+    sprintf(buf, "*** MAIN: shared memory attached and is ready to use\n");
+    printWrap(buf);
+
+    sprintf(buf, "\n");
+    printWrap(buf);
+    sprintf(buf, "Input array for qsort has %d elements\n", numA);
+    printWrap(buf);
     for (i = 0; i < numA; i++) {
-        printf("%d ", arrayA[i]);
+        sprintf(buf, "%4d", arrayA[i]);
+        printWrap(buf);
     }
-    printf("\n");
-    printf("Number of values for x: %d\n", numX);
+    sprintf(buf, "\n");
+    printWrap(buf);
+    sprintf(buf, "Input array for qsort has %d elements\n", numX);
+    printWrap(buf);
     for (i = 0; i < numX; i++) {
-        printf("%d ", arrayX[i]);
+        sprintf(buf, "%4d", arrayX[i]);
+        printWrap(buf);
     }
-    printf("\n");
-    printf("Number of values for y: %d\n", numY);
+    sprintf(buf, "\n");
+    printWrap(buf);
+    sprintf(buf, "Input array for qsort has %d elements\n", numY);
+    printWrap(buf);
     for (i = 0; i < numY; i++) {
-        printf("%d ", arrayY[i]);
+        sprintf(buf, "%4d", arrayY[i]);
+        printWrap(buf);
     }
-    printf("\n");
+    sprintf(buf, "\n");
+    printWrap(buf);
+    sprintf(buf, "\n");
+    printWrap(buf);
 
     // Load all of the values into shared memory
-    shmID = shmget(shmKey, (numA + numX + numY) * (sizeof(int)), (IPC_CREAT | 0666));
-    shmPtr = (int *) shmat(shmID, dataPrt, 0);
     loadData(shmPtr, 0, numA, arrayA);
     loadData(shmPtr, numA, numX + numA, arrayX);
     loadData(shmPtr, numX + numA, numY + numA + numX, arrayY);
 
-    printf("Printing data in main shm\n");
-    for (i = 0; i < numA + numX + numY; i++) {
-        printf("%d ", shmPtr[i]);
-    }
-    printf("\n");
-
     // detach from the shared memory
     shmdt(shmPtr);
+    sprintf(buf, "*** MAIN: shared memory successfully detached\n");
+    printWrap(buf);
 
     // Print out information about data
 
@@ -216,17 +237,18 @@ int main (void)
     mergeChild(shmKey, numA, numX, numY);
 
     // wait for both children to run
-    sprintf(buf, "Main Process Waits\n");
-    printWrap(buf);
     int status;
     for(i = 0; i < 2; i++) {
         wait(&status);
     }
 
     shmPtr = (int *) shmat(shmID, dataPrt, 0);
+    sprintf(buf, "*** MAIN: shared memory attached and is ready to use\n");
+    printWrap(buf);
+
     sprintf(buf, "*** MAIN: merged array:\n");
     printWrap(buf);
-    sprintf(buf, "    ");
+    sprintf(buf, "  ");
     printWrap(buf);
     for (i = numA; i < total; i++) {
         sprintf(buf, "%4d", shmPtr[i]);
@@ -235,8 +257,12 @@ int main (void)
     printf("\n");
 
     shmdt(shmPtr);
+    sprintf(buf, "*** MAIN: shared memory successfully detached\n");
+    printWrap(buf);
     // Close out the shared memory
     shmctl(shmID, IPC_RMID, NULL);
+    sprintf(buf, "*** MAIN: shared memory successfully removeed\n");
+    printWrap(buf);
 
     return 0;
 }
