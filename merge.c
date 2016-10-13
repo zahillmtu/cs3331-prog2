@@ -160,16 +160,19 @@ int main (int argc, char* argv[])
                                      mainStartInd + arrXsize,
                                      mainShmPtr) - mainStartInd;
 
-           index = mergeInd + i;
-           printf("Y     Index of: %d, for val: %d\n", index, mainShmPtr[i + mainStartInd + arrXsize]);
-           mergeShmPtr[index] = mainShmPtr[i + mainStartInd + arrXsize];
+            index = mergeInd + i;
+            if (index > arrXsize + arrYsize - 2) {
+                index = index - 1;
+            }
+            printf("Y     Index of: %d, for val: %d\n", index, mainShmPtr[i + mainStartInd + arrXsize]);
+            mergeShmPtr[index] = mainShmPtr[i + mainStartInd + arrXsize];
 
-           // detach from memory
-           shmdt(mainShmPtr);
-           shmdt(mergeShmPtr);
+            // detach from memory
+            shmdt(mainShmPtr);
+            shmdt(mergeShmPtr);
 
-           // exit child process
-           exit(0);
+            // exit child process
+            exit(0);
         }
     }
 
