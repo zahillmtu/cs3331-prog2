@@ -179,13 +179,18 @@ int main (int argc, char* argv[])
     }
     printf("MERGE - Done waiting for all\n");
 
-    printf("PRINT DATA IN MERGE SHARED MEMORY\n");
+    // Put values back into main shared memory location
     mergeShmPtr = (int *) shmat(mergeShmID, mergeDataPtr, 0);
+    mainShmPtr = (int *) shmat(mainShmID, dataPtr, 0);
+    int k = mainStartInd;
     for (i = 0; i < arrXsize + arrYsize; i++) {
-        printf("%d ", mergeShmPtr[i]);
+        mainShmPtr[k] = mergeShmPtr[i];
+        k++;
     }
-    printf("\n");
 
+    shmdt(mainShmPtr);
+    shmdt(mergeShmPtr);
+    shmctl(mergeShmID, IPC_RMID, NULL);
 
     return 0;
 }
