@@ -10,3 +10,62 @@
 
 # cs3331-prog2
 a qsort implementation with shared memory
+
+Question 1:
+The main program first pulls the data from stdin and loads it into shared
+memory for the other processes to access and use. It then prints 
+information on the data and calls execvp() to run both the qsort and
+merge programs concurrently. After waiting for the processes to finish,
+it prints out the final result.
+The merge program takes two sorted arrays, x[] and y[], and merges them
+into one final sorted array in shared memory. In order to do this it uses
+a modified binary search to find the number of values x[i] is larger than
+in array y[]. Using that value it can add it to it's index, or the number
+of values it's larger than in x[] to find the final position. Each binary
+search spawns a new process to find the indecies and load it into the 
+correct spot.
+The qsort program takes data in shared memory and sorts it. In order to
+do this it must recursively partition the data into two segments around
+a pivot. After the partition all the data to the left of the pivot will
+be less than the pivot and all greater than the pivot will be on the right.
+Each recursive quicksort call spawns a new child process to run the
+calculations concurrently.
+
+Question 2:
+This program works concurrently because each piece of data is not dependent
+on another piece and can be calculated seperately in their own processes.
+
+Question 3:
+I created two shared memory segments in my program.
+The first is the main shared memory segment in which all the data from
+stdin is loaded into in order to allow the merge and qsort programs access
+to the arrays concurrently.
+The second shared memory is created by the merge program to store data
+calculated by the child processes and is after copied into the main shared
+memory segment.
+
+Question 4:
+There are NO potential race conditions in the program. Because each element
+in the array is distinct, each calculation will have a distinct answer, so
+each element will be placed into a distinct index in the shared memory. This
+means that no two processes will ever attempt to update the same data
+location. The main program also wait()s until both merge and qsort have
+finished and exited before printing out the results.
+
+Question 5:
+Using an array of strings, I pass the parameters to argv[] of the program.
+argv[0] - is the program name
+argv[1] - Key to shared main memory segment
+argv[2] - index to start the sort
+argv[3] - index to end the sort
+argv[4] - size of the main memory segment
+
+Question 6:
+Using an array of strings, I pass the parameters to argv[] of the program
+argv[0] - is the program name
+argv[1] - Key to main shared memory segment
+argv[2] - Starting index for merge data in shared mem
+argv[3] - Number of elements in array x[]
+argv[4] - Number of elements in array y[]
+
+
