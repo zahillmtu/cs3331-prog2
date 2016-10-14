@@ -99,10 +99,10 @@ void run(char *exec, char *args[]) {
     return;
 }
 
-void qsortChild(key_t shmID, int arraySize)
+void qsortChild(key_t shmID, int arraySize, int totalSize)
 {
     char *exec = "./qsort";
-    char *args[5] = { NULL };
+    char *args[6] = { NULL };
     char buf[100];
 
     sprintf(buf, "*** MAIN: about to spawn the process for qsort\n");
@@ -113,8 +113,10 @@ void qsortChild(key_t shmID, int arraySize)
     args[1] = strdup(buf);
     sprintf(buf, "%d", 0);
     args[2] = strdup(buf);
-    sprintf(buf, "%d", arraySize);
+    sprintf(buf, "%d", arraySize - 1);
     args[3] = strdup(buf);
+    sprintf(buf, "%d", totalSize);
+    args[4] = strdup(buf);
 
     run(exec, args);
 }
@@ -230,7 +232,7 @@ int main (void)
 
 
     // Create qsort child and run it
-    qsortChild(shmKey, numA);
+    qsortChild(shmKey, numA, total);
 
 
     // Create merge child and runt it
@@ -245,6 +247,16 @@ int main (void)
     shmPtr = (int *) shmat(shmID, dataPrt, 0);
     sprintf(buf, "*** MAIN: shared memory attached and is ready to use\n");
     printWrap(buf);
+
+    sprintf(buf, "*** MAIN: qsort array:\n");
+    printWrap(buf);
+    sprintf(buf, "  ");
+    printWrap(buf);
+    for (i = 0; i < numA; i++) {
+        sprintf(buf, "%4d", shmPtr[i]);
+        printWrap(buf);
+    }
+    printf("\n");
 
     sprintf(buf, "*** MAIN: merged array:\n");
     printWrap(buf);
