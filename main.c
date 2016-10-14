@@ -32,6 +32,15 @@ void printWrap(char buf[100]) {
     write(1, buf, strlen(buf));
 }
 
+// -----------------------------------------------------------
+// FUNCTION getNumOfVals :
+//    Returns the integer passed into stdin giving th
+//    size of the next array of numbers
+// PARAMETER USAGE :
+//    N/A
+// FUNCTION CALLED :
+//    scanf()
+// -----------------------------------------------------------
 int getNumOfVals()
 {
     int num;
@@ -45,6 +54,15 @@ int getNumOfVals()
     return num;
 }
 
+// -----------------------------------------------------------
+// FUNCTION getVals :
+//    Returns from stdin an array of integers
+// PARAMETER USAGE :
+//    numOfVals - size of the array
+//    vals[]    - the array to store the vales
+// FUNCTION CALLED :
+//    scanf()
+// -----------------------------------------------------------
 void getVals(int numOfVals, int vals[])
 {
     int status = 0;
@@ -58,12 +76,24 @@ void getVals(int numOfVals, int vals[])
     }
 }
 
-void loadData(int * shmPrt, int startInd, int endInd, int array[])
+// -----------------------------------------------------------
+// FUNCTION loadData :
+//    Used to load an array into shared memory
+// PARAMETER USAGE :
+//    shmPtr - pointer to a shared memory location
+//              MUST already be attached!
+//    startInd - starting index for loading the array
+//    endInd   - ending index for loading the array
+//    array[]  - array to copy data from into shared memory
+// FUNCTION CALLED :
+//    None
+// -----------------------------------------------------------
+void loadData(int * shmPtr, int startInd, int endInd, int array[])
 {
     int i = 0;
     int k = 0;
     for (i = startInd; i < endInd; i++) {
-        shmPrt[i] = array[k];
+        shmPtr[i] = array[k];
         k++;
     }
 }
@@ -73,6 +103,18 @@ void loadData(int * shmPrt, int startInd, int endInd, int array[])
  * to the name of the executable and args should contain an array where arg[0]
  * is the name of the exec and arg[1 - 31] are the arguments passed
  */
+// -----------------------------------------------------------
+// FUNCTION loadData :
+//    Function to fork a process and run the execvp command. exec should be set
+//    to the name of the executable and args should contain an array where arg[0]
+//    is the name of the exec and arg[1 - 31] are the arguments passed
+// PARAMETER USAGE :
+//    exec - name of program to run
+//    args[] - list of arguments passed to the program
+//             in typical unix standard
+// FUNCTION CALLED :
+//    execvp
+// -----------------------------------------------------------
 void run(char *exec, char *args[]) {
 
     // fork the process
@@ -93,6 +135,16 @@ void run(char *exec, char *args[]) {
     return;
 }
 
+// -----------------------------------------------------------
+// FUNCTION qsortChild :
+//    Calls the qsort program with passed in arguments
+// PARAMETER USAGE :
+//    shmID - ID of the main shared memory segment
+//    arraySize - size of elements in array a[]
+//    totalSize - total size of main shared memory
+// FUNCTION CALLED :
+//    run()
+// -----------------------------------------------------------
 void qsortChild(key_t shmID, int arraySize, int totalSize)
 {
     char *exec = "./qsort";
@@ -115,6 +167,17 @@ void qsortChild(key_t shmID, int arraySize, int totalSize)
     run(exec, args);
 }
 
+// -----------------------------------------------------------
+// FUNCTION mergeChild :
+//    Calls the merge program with specified arguments
+// PARAMETER USAGE :
+//    shmID - ID of the main shared memory segment
+//    startInd - beginning of arrays in shared memory
+//    arrXsize - the size of array x[]
+//    arrYsize - the size of array y[]
+// FUNCTION CALLED :
+//    run()
+// -----------------------------------------------------------
 void mergeChild(key_t shmID, int startInd, int arrXsize, int arrYsize)
 {
     char *exec = "./merge";
@@ -137,6 +200,21 @@ void mergeChild(key_t shmID, int startInd, int arrXsize, int arrYsize)
     run(exec, args);
 }
 
+// -----------------------------------------------------------
+// FUNCTION main :
+//    Prints information about running the program and shared
+//    memory. Pulls the data from stdin and loads the arrays
+//    into shared memory. Then calls qsort and merge to handle
+//    the data.
+// PARAMETER USAGE :
+//    NONE
+// FUNCTION CALLED :
+//    shm functions
+//    getVals
+//    loadData
+//    qsortChild
+//    mergeChild
+// -----------------------------------------------------------
 int main (void)
 {
     char buf[100];

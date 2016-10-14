@@ -29,6 +29,19 @@ void printWrap(char buf[100]) {
     write(1, buf, strlen(buf));
 }
 
+// -----------------------------------------------------------
+// FUNCTION recurseBinary :
+//    recursive binary search function to find the index
+//    of a value in order to merge to arrays into one sorted
+//    array
+// PARAMETER USAGE :
+//    value - the value you are looking to index
+//    startInd - Index to start binary search
+//    endInd - index to end binary search
+//    mainShmPtr - pointer to main shared memory location
+// FUNCTION CALLED :
+//    recurseBinary
+// -----------------------------------------------------------
 int recurseBinary (int value, int startInd, int endInd, int * mainShmPtr)
 {
     int length = endInd - startInd + 1;
@@ -52,6 +65,23 @@ int recurseBinary (int value, int startInd, int endInd, int * mainShmPtr)
     }
 }
 
+// -----------------------------------------------------------
+// FUNCTION main :
+//    Function calls a recursive binary search for each
+//    element in both arrays in order to find the index
+//    that each element should be placed in the final merged
+//    and sorted array
+// PARAMETER USAGE :
+//    argc - not used
+//    argv[1] - Key to main shared memory segment
+//    argv[2] - Starting index for merge data in shared mem
+//    argv[3] - Number of elements in array x[]
+//    argv[4] - Number of elements in array y[]
+// FUNCTION CALLED :
+//    recurseBinary
+//    shm functions
+//    fork functions
+// -----------------------------------------------------------
 int main (int argc, char* argv[])
 {
     int mainShmKey = 0;

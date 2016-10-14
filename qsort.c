@@ -30,6 +30,16 @@ void printWrap(char buf[100]) {
     write(1, buf, strlen(buf));
 }
 
+// -----------------------------------------------------------
+// FUNCTION swap :
+//    swaps the location of the items at given indecies
+// PARAMETER USAGE :
+//    shmPtr - pointer to attached memory segment
+//    indexA - index of element to swap
+//    indexB - index of element to swap
+// FUNCTION CALLED :
+//    NONE
+// -----------------------------------------------------------
 void swap(int * shmPtr, int indexA, int indexB)
 {
     int temp = shmPtr[indexA];
@@ -37,6 +47,18 @@ void swap(int * shmPtr, int indexA, int indexB)
     shmPtr[indexB] = temp;
 }
 
+// -----------------------------------------------------------
+// FUNCTION partition :
+//    Places all values less than the pivot on the left of
+//    the pivot and all values greater than the pivot on
+//    the right
+// PARAMETER USAGE :
+//    shmPtr - pointer to attached memory segment
+//    left   - index to start the partition
+//    right  - index to end the partition
+// FUNCTION CALLED :
+//    swap
+// -----------------------------------------------------------
 int partition(int * shmPtr, int left, int right)
 {
     char buf[100];
@@ -56,6 +78,19 @@ int partition(int * shmPtr, int left, int right)
     return i;
 }
 
+// -----------------------------------------------------------
+// FUNCTION quicksort :
+//    recursive quicksort algorithm that spawns a new process
+//    to handle the left and right partitions
+// PARAMETER USAGE :
+//    shmPtr - pointer to attached memory segment
+//    left   - index to start the quicksort
+//    right  - index to end the quicksort
+// FUNCTION CALLED :
+//    quicksort
+//    partition
+//    fork functions
+// -----------------------------------------------------------
 void quicksort(int * shmPtr, int left, int right)
 {
     int m;
@@ -104,6 +139,20 @@ void quicksort(int * shmPtr, int left, int right)
     }
 }
 
+// -----------------------------------------------------------
+// FUNCTION main :
+//    Sorts data stored in shared memory using a recursive
+//    quicksort algorithm that spawns new processes
+// PARAMETER USAGE :
+//    argc    - Not used
+//    argv[1] - Key to shared main memory segment
+//    argv[2] - index to start the sort
+//    argv[3] - index to end the sort
+//    argv[4] - size of the main memory segment
+// FUNCTION CALLED :
+//    quicksort
+//    shm functions
+// -----------------------------------------------------------
 int main (int argc, char* argv[])
 {
 
