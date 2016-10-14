@@ -32,7 +32,6 @@ void printWrap(char buf[100]) {
 
 void swap(int * shmPtr, int indexA, int indexB)
 {
-    printf("swapping: %d and %d\n",shmPtr[indexA], shmPtr[indexB]);
     int temp = shmPtr[indexA];
     shmPtr[indexA] = shmPtr[indexB];
     shmPtr[indexB] = temp;
@@ -40,8 +39,12 @@ void swap(int * shmPtr, int indexA, int indexB)
 
 int partition(int * shmPtr, int left, int right)
 {
+    char buf[100];
     int k = 0;
     int pivot = shmPtr[right];
+    sprintf(buf, "   ### Q-PROC(%d): pivot element is "
+            "a[%d] = %d\n", getpid(), right, shmPtr[right]);
+    printWrap(buf);
     int i = left;
     for (k = left; k < right; k++) {
         if (shmPtr[k] <= pivot) {
@@ -57,6 +60,7 @@ void quicksort(int * shmPtr, int left, int right)
 {
     int m;
     int i;
+    char buf[100];
     pid_t pid;
     if (left < right) {
         m = partition(shmPtr, left, right);
@@ -68,7 +72,12 @@ void quicksort(int * shmPtr, int left, int right)
         }
         else if(pid == 0) {
             // The child process
+            sprintf(buf, "   ### Q-PROC(%d): entering with "
+                "a[%d..%d]\n", getpid(), left, m - 1);
+            printWrap(buf);
             quicksort(shmPtr, left, m - 1);
+            sprintf(buf, "   ### Q-PROC(%d): exits\n", getpid());
+            printWrap(buf);
             exit(0);
         }
         // fork the process for right sort
@@ -79,7 +88,12 @@ void quicksort(int * shmPtr, int left, int right)
         }
         else if(pid == 0) {
             // The child process
+            sprintf(buf, "   ### Q-PROC(%d): entering with "
+                "a[%d..%d]\n", getpid(), right, m + 1);
+            printWrap(buf);
             quicksort(shmPtr, m + 1, right);
+            sprintf(buf, "   ### Q-PROC(%d): exits\n", getpid());
+            printWrap(buf);
             exit(0);
         }
         // wait for child processs
@@ -107,7 +121,7 @@ int main (int argc, char* argv[])
 
     shmID = shmget(mainShmKey, (totalMemSize) * (sizeof(int)), (0666));
     shmPtr = (int *) shmat(shmID, dataPtr, 0);
-    sprintf(buf, "  ### PROC(%d): main shared memory atached and "
+    sprintf(buf, "   ### Q-PROC(%d): main shared memory atached and "
             "is ready to use\n", getpid());
     printWrap(buf);
 

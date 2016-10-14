@@ -90,12 +90,6 @@ void run(char *exec, char *args[]) {
             exit(EXIT_FAILURE);
         }
     }
-    else {
-        // wait for the child
-        int status = 0;
-        wait(&status);
-        return;
-    }
     return;
 }
 
@@ -228,12 +222,8 @@ int main (void)
     sprintf(buf, "*** MAIN: shared memory successfully detached\n");
     printWrap(buf);
 
-    // Print out information about data
-
-
     // Create qsort child and run it
     qsortChild(shmKey, numA, total);
-
 
     // Create merge child and runt it
     mergeChild(shmKey, numA, numX, numY);
